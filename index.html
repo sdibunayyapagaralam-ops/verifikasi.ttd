@@ -287,15 +287,16 @@
 <script>
 function getParams() {
   const p = new URLSearchParams(window.location.search);
+  // Dukung nama param baru (singkat) dan lama (panjang) untuk kompatibilitas
   return {
-    no: p.get('no') || '',
-    hal: p.get('hal') || '',
-    tgl: p.get('tgl') || '',
-    ttd: p.get('ttd') || '',
-    jbt: p.get('jbt') || '',
-    ts: p.get('ts') || '',
-    file: p.get('file') || '',
-    filelabel: p.get('filelabel') || 'Lihat Dokumen Asli (PDF)'
+    no:       p.get('n')  || p.get('no')  || '',
+    hal:      p.get('h')  || p.get('hal') || '',
+    tgl:      p.get('d')  || p.get('tgl') || '',
+    ttd:      p.get('s')  || p.get('ttd') || '',
+    jbt:      p.get('j')  || p.get('jbt') || '',
+    ts:       p.get('ts') || '',
+    file:     p.get('f')  || p.get('file') || '',
+    filelabel: p.get('fl') || p.get('filelabel') || 'Lihat Dokumen Asli (PDF)'
   };
 }
 
