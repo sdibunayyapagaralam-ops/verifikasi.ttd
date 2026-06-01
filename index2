@@ -1,0 +1,522 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verifikasi Dokumen — SD Islam Bunayya</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --hijau:        #1a6b45;
+    --hijau-muda:   #2d9566;
+    --hijau-terang: #e8f5ee;
+    --emas:         #b8922a;
+    --emas-muda:    #f5e9c8;
+    --abu:          #6b7280;
+    --bg:           #f8f7f4;
+    --putih:        #ffffff;
+    --teks:         #1a1a1a;
+    --border:       #e2ddd5;
+    --merah:        #dc3545;
+    --merah-muda:   #fff0f0;
+    --kuning:       #92680a;
+    --kuning-muda:  #fffbeb;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .header-bar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--hijau), var(--emas), var(--hijau));
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  .header h1 {
+    font-family: 'Amiri', serif;
+    color: var(--hijau);
+    font-size: 24px;
+    margin-bottom: .2rem;
+  }
+
+  .header p { font-size: 12px; color: var(--abu); }
+
+  .card {
+    background: var(--putih);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  }
+
+  /* Loading */
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--hijau-terang);
+    border-top-color: var(--hijau);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .status-loading { text-align: center; padding: 2rem 0; }
+  .status-loading p { color: var(--abu); font-size: 13px; }
+
+  /* Badge */
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .badge-valid {
+    background: var(--hijau-terang);
+    border: 1.5px solid #a3d4b8;
+  }
+
+  .badge-lama {
+    background: var(--kuning-muda);
+    border: 1.5px solid #f0c060;
+  }
+
+  .badge-palsu {
+    background: var(--merah-muda);
+    border: 1.5px solid #fca5a5;
+  }
+
+  .badge .ikon { font-size: 32px; flex-shrink: 0; }
+
+  .badge .judul {
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .badge-valid  .judul { color: var(--hijau); }
+  .badge-lama   .judul { color: var(--kuning); }
+  .badge-palsu  .judul { color: var(--merah); }
+
+  .badge .subjudul { font-size: 12px; margin-top: 2px; }
+  .badge-valid  .subjudul { color: var(--hijau-muda); }
+  .badge-lama   .subjudul { color: #a07820; }
+  .badge-palsu  .subjudul { color: #ef4444; }
+
+  /* Tabel */
+  .tabel-dokumen {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+  }
+
+  .tabel-dokumen tr { border-bottom: 1px solid var(--border); }
+  .tabel-dokumen tr:last-child { border-bottom: none; }
+
+  .tabel-dokumen td {
+    padding: .65rem .25rem;
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  .tabel-dokumen td:first-child {
+    color: var(--abu);
+    width: 38%;
+    font-size: 12px;
+    padding-top: .75rem;
+  }
+
+  .tabel-dokumen td:last-child {
+    font-weight: 600;
+    color: var(--teks);
+  }
+
+  /* Blok penandatangan */
+  .blok-ttd {
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .blok-ttd-valid { background: var(--hijau-terang); border: 1px solid #b7dfc9; }
+  .blok-ttd-lama  { background: var(--kuning-muda);  border: 1px solid #f0c060; }
+
+  .avatar-ttd {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    font-family: 'Amiri', serif;
+  }
+
+  .avatar-valid { background: var(--hijau); }
+  .avatar-lama  { background: var(--emas); }
+
+  .info-ttd .nama {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .info-ttd-valid .nama { color: var(--hijau); }
+  .info-ttd-lama  .nama { color: var(--kuning); }
+
+  .info-ttd .jabatan { font-size: 12px; }
+  .info-ttd-valid .jabatan { color: var(--hijau-muda); }
+  .info-ttd-lama  .jabatan { color: #a07820; }
+
+  /* Kotak peringatan format lama */
+  .kotak-lama {
+    background: var(--kuning-muda);
+    border: 1px solid #f0c060;
+    border-radius: 10px;
+    padding: .85rem 1rem;
+    font-size: 12px;
+    color: var(--kuning);
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Tombol dokumen */
+  .tombol-dokumen {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: var(--hijau);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s;
+    margin-bottom: .75rem;
+  }
+
+  .tombol-dokumen:hover { background: var(--hijau-muda); }
+
+  /* ID & timestamp */
+  .id-dokumen {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .6rem .85rem;
+    font-size: 10px;
+    color: var(--abu);
+    word-break: break-all;
+    font-family: monospace;
+    margin-top: 1rem;
+  }
+
+  .id-dokumen span { color: var(--teks); }
+
+  .waktu-verifikasi {
+    text-align: center;
+    font-size: 11px;
+    color: var(--abu);
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Status kosong */
+  .status-kosong {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--abu);
+  }
+
+  .status-kosong .ikon-besar { font-size: 48px; margin-bottom: 1rem; }
+
+  .status-kosong h2 {
+    font-size: 16px;
+    color: var(--teks);
+    margin-bottom: .5rem;
+  }
+
+  .status-kosong p { font-size: 13px; line-height: 1.7; }
+
+  .footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 11px;
+    color: #9ca3af;
+    max-width: 520px;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-bar"></div>
+  <h1>Verifikasi Dokumen Digital</h1>
+  <p>SD Islam Bunayya — Kota Pagar Alam</p>
+</div>
+
+<div class="card" id="card-utama">
+  <div class="status-loading">
+    <div class="spinner"></div>
+    <p>Memverifikasi dokumen...</p>
+  </div>
+</div>
+
+<div class="footer">
+  Verifikasi resmi hanya melalui halaman ini.<br>
+  Jika meragukan keaslian dokumen, hubungi langsung SD Islam Bunayya.
+</div>
+
+<script>
+// ── Konfigurasi Supabase ──────────────────────────────────────
+const SUPABASE_URL = 'https://dmemwgvqyjetanrhpqwg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtZW13Z3ZxeWpldGFucmhwcXdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyODMyODgsImV4cCI6MjA5NTg1OTI4OH0.2W5Px7CtURwszukcq1xSy_DSP6l5CyUXIF9WSO4NUSg';
+
+// ── Helpers ───────────────────────────────────────────────────
+function getInisial(nama) {
+  return (nama || '?').split(' ').slice(0, 2).map(w => w[0] || '').join('').toUpperCase();
+}
+
+function formatTanggal(d) {
+  if (!d) return '—';
+  const bln = ['Januari','Februari','Maret','April','Mei','Juni',
+               'Juli','Agustus','September','Oktober','November','Desember'];
+  const [y, m, day] = d.split('-');
+  return parseInt(day) + ' ' + bln[parseInt(m) - 1] + ' ' + y;
+}
+
+function formatTanggalLama(d) {
+  // Format lama: YYYY-MM-DD atau DD-MM-YYYY atau kosong
+  if (!d) return '—';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return formatTanggal(d);
+  return d; // tampilkan apa adanya jika format berbeda
+}
+
+function formatWaktu(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('id-ID', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  }) + ', ' + d.toLocaleTimeString('id-ID');
+}
+
+function tombolLink(url, label) {
+  if (!url || url.trim() === '') return '';
+  return `<a href="${url}" target="_blank" rel="noopener" class="tombol-dokumen">
+    📄 ${label || 'Lihat Dokumen Asli'}
+  </a>`;
+}
+
+// ── TAMPILAN ──────────────────────────────────────────────────
+function tampilKosong() {
+  document.getElementById('card-utama').innerHTML = `
+    <div class="status-kosong">
+      <div class="ikon-besar">🔏</div>
+      <h2>Halaman Verifikasi Dokumen</h2>
+      <p>Halaman ini digunakan untuk memverifikasi keaslian dokumen digital
+      SD Islam Bunayya Kota Pagar Alam.<br><br>
+      Untuk memverifikasi, silakan <strong>scan QR Code</strong> yang tertera
+      di dokumen resmi yang Anda terima.</p>
+    </div>`;
+}
+
+function tampilTidakDitemukan(id) {
+  document.getElementById('card-utama').innerHTML = `
+    <div class="badge badge-palsu">
+      <div class="ikon">⛔</div>
+      <div>
+        <div class="judul">Dokumen Tidak Ditemukan</div>
+        <div class="subjudul">ID ini tidak terdaftar dalam database resmi sekolah</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:#374151;line-height:1.8;margin-bottom:1rem;">
+      Dokumen dengan ID berikut <strong>tidak ada dalam database</strong>
+      SD Islam Bunayya. Kemungkinan:
+    </p>
+    <ul style="font-size:13px;color:#374151;line-height:2;padding-left:1.25rem;margin-bottom:1.25rem;">
+      <li>Bukan dokumen resmi yang diterbitkan sekolah</li>
+      <li>QR Code telah dimanipulasi atau dipalsukan</li>
+    </ul>
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
+      padding:.85rem;font-size:12px;color:#b91c1c;line-height:1.6;">
+      ⚠️ <strong>Jangan menerima dokumen ini</strong> tanpa konfirmasi
+      langsung ke SD Islam Bunayya.
+    </div>
+    <div class="id-dokumen">ID yang dicari: <span>${id}</span></div>`;
+}
+
+// ── TAMPIL FORMAT BARU (dari Supabase) ────────────────────────
+function tampilDokumenBaru(doc) {
+  document.getElementById('card-utama').innerHTML = `
+    <div class="badge badge-valid">
+      <div class="ikon">✅</div>
+      <div>
+        <div class="judul">Dokumen Terverifikasi</div>
+        <div class="subjudul">Terdaftar dalam database resmi SD Islam Bunayya</div>
+      </div>
+    </div>
+
+    <table class="tabel-dokumen">
+      <tr><td>Nomor Surat</td><td>${doc.nomor || '—'}</td></tr>
+      <tr><td>Perihal</td>   <td>${doc.perihal  || '—'}</td></tr>
+      <tr><td>Tanggal</td>   <td>${formatTanggal(doc.tanggal)}</td></tr>
+    </table>
+
+    <div class="blok-ttd blok-ttd-valid">
+      <div class="avatar-ttd avatar-valid">${getInisial(doc.nama)}</div>
+      <div class="info-ttd info-ttd-valid">
+        <div class="nama">${doc.nama}</div>
+        <div class="jabatan">${doc.jabatan || 'Kepala Sekolah'}</div>
+      </div>
+    </div>
+
+    ${tombolLink(doc.linkfile, doc.labeltombol)}
+
+    <div class="id-dokumen">ID Dokumen: <span>${doc.id}</span></div>
+
+    <div class="waktu-verifikasi">
+      🕐 Diterbitkan: ${formatWaktu(doc.created_at)}<br>
+      Diverifikasi: ${formatWaktu(new Date())}
+    </div>`;
+}
+
+// ── TAMPIL FORMAT LAMA (dari parameter URL) ───────────────────
+function tampilDokumenLama(p) {
+  const nama    = p.get('s') || '—';
+  const jabatan = p.get('j') || '—';
+  const nomor   = p.get('n') || '—';
+  const perihal = p.get('h') || '—';
+  const tanggal = p.get('d') || '';
+  const linkfile    = p.get('f')  || '';
+  const labeltombol = p.get('fl') || 'Lihat Dokumen Asli';
+  const ts = p.get('ts');
+
+  document.getElementById('card-utama').innerHTML = `
+    <div class="badge badge-lama">
+      <div class="ikon">⚠️</div>
+      <div>
+        <div class="judul">Dokumen Lama — Terverifikasi Sebagian</div>
+        <div class="subjudul">Diterbitkan sebelum sistem database aktif</div>
+      </div>
+    </div>
+
+    <div class="kotak-lama">
+      📋 <strong>Catatan:</strong> Dokumen ini dibuat menggunakan sistem
+      tanda tangan lama yang menyimpan data langsung di QR Code, bukan di
+      database server. Data yang tampil di bawah berasal dari QR itu sendiri —
+      belum dapat diverifikasi ke server.<br><br>
+      Jika ragu, konfirmasi keaslian dokumen ini langsung ke SD Islam Bunayya.
+    </div>
+
+    <table class="tabel-dokumen">
+      <tr><td>Nomor Surat</td><td>${nomor}</td></tr>
+      <tr><td>Perihal</td>   <td>${perihal}</td></tr>
+      <tr><td>Tanggal</td>   <td>${formatTanggalLama(tanggal)}</td></tr>
+    </table>
+
+    <div class="blok-ttd blok-ttd-lama">
+      <div class="avatar-ttd avatar-lama">${getInisial(nama)}</div>
+      <div class="info-ttd info-ttd-lama">
+        <div class="nama">${nama}</div>
+        <div class="jabatan">${jabatan}</div>
+      </div>
+    </div>
+
+    ${tombolLink(linkfile, labeltombol)}
+
+    <div class="waktu-verifikasi">
+      ${ts ? '🕐 Diterbitkan: ' + formatWaktu(parseInt(ts)) + '<br>' : ''}
+      Diverifikasi: ${formatWaktu(new Date())}
+    </div>`;
+}
+
+// ── MAIN ──────────────────────────────────────────────────────
+(async function main() {
+  const p  = new URLSearchParams(window.location.search);
+  const id = p.get('id');
+  const n  = p.get('n');   // penanda format lama
+  const s  = p.get('s');   // penanda format lama
+
+  // Tidak ada parameter sama sekali → halaman info
+  if (!id && !n && !s) {
+    tampilKosong();
+    return;
+  }
+
+  // ── FORMAT LAMA: ada parameter n atau s tapi tidak ada id ──
+  if (!id && (n || s)) {
+    tampilDokumenLama(p);
+    return;
+  }
+
+  // ── FORMAT BARU: ada parameter id → cek ke Supabase ────────
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/dokumen?id=eq.${encodeURIComponent(id)}&select=*`,
+      {
+        headers: {
+          'apikey':        SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        }
+      }
+    );
+
+    if (!res.ok) throw new Error('Status ' + res.status);
+
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+      tampilTidakDitemukan(id);
+    } else {
+      tampilDokumenBaru(data[0]);
+    }
+
+  } catch (err) {
+    document.getElementById('card-utama').innerHTML = `
+      <div class="badge badge-palsu">
+        <div class="ikon">⚠️</div>
+        <div>
+          <div class="judul">Gagal Terhubung ke Server</div>
+          <div class="subjudul">Periksa koneksi internet Anda</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#374151;line-height:1.8;margin-bottom:1rem;">
+        Tidak dapat memverifikasi dokumen karena koneksi ke database gagal.
+        Silakan coba lagi atau hubungi SD Islam Bunayya secara langsung.
+      </p>
+      <div class="id-dokumen">Error: <span>${err.message}</span></div>`;
+  }
+})();
+</script>
+</body>
+</html>
